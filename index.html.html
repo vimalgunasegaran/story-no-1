@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two Friends — Vimalgunasegaran</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+Tamil+2:wght@500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Noto+Serif+Tamil:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --night:      #14131f;
+    --night-2:    #1c1b2c;
+    --hairline:   #3a3856;
+    --amber:      #f2a53c;
+    --amber-dim:  #8a6a35;
+    --rust:       #d1603b;
+    --cream:      #f4ecd8;
+    --muted:      #a19cc0;
+    --rec:        #e8503f;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(900px 600px at 50% 20%, #232140, #0a0a12 75%);
+    font-family:'Noto Serif Tamil','Noto Sans Tamil',serif;
+    padding:28px 10px;
+  }
+
+  /* ---------------- phone shell ---------------- */
+  .phone{
+    position:relative;
+    width:min(94vw, 400px);
+    height:min(88vh, 800px);
+    background:#050508;
+    border-radius:52px;
+    padding:16px;
+    box-shadow:
+      0 0 0 2px #34324a,
+      0 30px 70px -20px rgba(0,0,0,.8),
+      0 0 60px rgba(242,165,60,.06);
+  }
+  .screen{
+    position:relative;
+    width:100%; height:100%;
+    background:var(--night);
+    border-radius:38px;
+    overflow:hidden;
+  }
+  .notch{
+    position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:110px; height:22px; background:#050508; border-radius:14px;
+    z-index:50;
+  }
+  .statusbar{
+    position:absolute; top:0; left:0; right:0; height:42px;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 26px;
+    font-family:'JetBrains Mono',monospace; font-size:10px;
+    color:var(--muted); letter-spacing:.04em;
+    z-index:40;
+  }
+  .statusbar .rec{
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .statusbar .rec .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--rec);
+    animation:blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  .home-indicator{
+    position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+    width:110px; height:4px; border-radius:2px;
+    background:rgba(244,236,216,.35);
+    z-index:40;
+  }
+
+  /* ---------------- pages ---------------- */
+  .pages{
+    position:absolute; inset:0;
+    padding-top:42px; padding-bottom:26px;
+  }
+  .pg{
+    position:absolute; inset:42px 0 26px 0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:22px 22px 30px;
+    -webkit-overflow-scrolling:touch;
+    backface-visibility:hidden;
+    transform-origin:left center;
+    transition:transform .62s cubic-bezier(.55,.06,.28,.99), opacity .5s ease, box-shadow .6s ease;
+  }
+  .pg::-webkit-scrollbar{ width:3px; }
+  .pg::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:2px; }
+
+  .pg.current{ transform:rotateY(0deg); opacity:1; z-index:5; box-shadow:none; }
+  .pg.left-hidden{ transform:rotateY(-120deg); opacity:0; z-index:1; pointer-events:none; }
+  .pg.right-hidden{ transform:rotateY(70deg); opacity:0; z-index:1; pointer-events:none; }
+  .pg.stacked{ display:none; }
+
+  .pg.current.shading::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(0,0,0,.35), transparent 35%);
+    pointer-events:none;
+  }
+
+  /* ---------------- tap zones ---------------- */
+  .tapzone{
+    position:absolute; top:42px; bottom:26px; width:30%;
+    z-index:20; cursor:pointer;
+  }
+  .tapzone.left{ left:0; }
+  .tapzone.right{ right:0; }
+
+  /* ---------------- shared content styles ---------------- */
+  .rec-chip{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px; letter-spacing:.06em; color:var(--muted);
+  }
+  .rec-chip .dot{ width:6px; height:6px; border-radius:50%; background:var(--rec); box-shadow:0 0 6px 1px rgba(232,80,63,.7); }
+
+  .corner{ position:absolute; width:16px; height:16px; border-color:var(--amber-dim); opacity:.7; }
+  .corner.tl{ top:8px; left:8px; border-top:2px solid; border-left:2px solid; }
+  .corner.tr{ top:8px; right:8px; border-top:2px solid; border-right:2px solid; }
+  .corner.bl{ bottom:8px; left:8px; border-bottom:2px solid; border-left:2px solid; }
+  .corner.br{ bottom:8px; right:8px; border-bottom:2px solid; border-right:2px solid; }
+
+  /* cover page */
+  .cover-content{
+    height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; position:relative;
+  }
+  .bulb-glow{
+    width:10px; height:10px; border-radius:50%; background:var(--amber);
+    box-shadow:0 0 20px 7px rgba(242,165,60,.5), 0 0 46px 18px rgba(242,165,60,.15);
+    margin-bottom:26px;
+    animation:flicker 3.2s ease-in-out infinite;
+  }
+  @keyframes flicker{ 0%,100%{opacity:1;} 48%{opacity:.85;} 50%{opacity:.55;} 52%{opacity:.9;} }
+  .cover-content .kicker{ font-family:'Noto Sans Tamil',sans-serif; font-size:12px; color:var(--muted); margin-bottom:16px; }
+  .cover-content h1{
+    font-family:'Baloo Tamil 2',sans-serif; font-weight:800;
+    font-size:40px; line-height:1.08; margin:0; color:var(--cream);
+    text-shadow:0 0 30px rgba(242,165,60,.22);
+  }
+  .cover-content .sub{ margin-top:10px; font-family:'Noto Sans Tamil',sans-serif; font-weight:500; font-size:14px; color:var(--amber); }
+  .cover-content .tag{ max-width:230px; margin:22px auto 0; font-style:italic; font-size:13px; line-height:1.7; color:var(--muted); }
+  .cover-content .byline{ margin-top:34px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); }
+  .cover-content .byline .name{ display:block; margin-top:6px; font-family:'Noto Sans Tamil',sans-serif; font-size:14px; font-weight:600; color:var(--cream); }
+  .tap-hint{
+    position:absolute; bottom:6px; left:0; right:0; text-align:center;
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:.4;} 50%{opacity:1;} }
+
+  /* contents page */
+  .toc-eyebrow{ text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:.08em; margin:6px 0 22px; }
+  .track{ position:relative; height:2px; background:var(--hairline); margin-bottom:20px; }
+  .toc-list{ list-style:none; margin:0; padding:0; }
+  .toc-list li{ display:flex; align-items:baseline; gap:12px; padding:12px 2px; border-bottom:1px solid var(--hairline); }
+  .toc-list .tc{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--amber); min-width:46px; }
+  .toc-list .tt{ font-family:'Noto Sans Tamil',sans-serif; font-size:14px; font-weight:500; color:var(--cream); }
+
+  /* chapter heading block */
+  .chapter-frame{ position:relative; padding:20px 6px 18px; margin-bottom:20px; text-align:center; }
+  .chapter-title{ font-family:'Baloo Tamil 2',sans-serif; font-weight:700; font-size:22px; color:var(--cream); margin:10px 0 0; }
+  .chapter-title .en{ display:block; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.08em; color:var(--muted); font-weight:400; margin-top:8px; }
+
+  .pg p{ font-size:15px; line-height:1.85; color:var(--cream); margin:0 0 16px; }
+  .cap{ margin:0 0 12px; padding:10px 13px; background:rgba(255,255,255,.045); border-left:2px solid var(--rust); border-radius:0 4px 4px 0; font-family:'Noto Sans Tamil',sans-serif; font-size:13.5px; line-height:1.7; color:#f0e6ce; }
+
+  .stop p{ font-family:'Noto Serif Tamil',serif; font-style:italic; font-size:15px; line-height:1.85; color:var(--cream); text-align:center; margin-top:10px; }
+  .credits{ height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .credits .card{ font-style:italic; font-size:14px; color:var(--amber); line-height:1.8; max-width:230px; margin-bottom:30px; }
+  .credits .the-end{ font-family:'Baloo Tamil 2',sans-serif; font-weight:700; font-size:18px; color:var(--cream); }
+  .credits .by{ margin-top:20px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); }
+  .credits .by .name{ display:block; margin-top:6px; font-family:'Noto Sans Tamil',sans-serif; font-size:13px; font-weight:600; color:var(--cream); }
+
+  .pagefoot{
+    position:absolute; bottom:26px; left:0; right:0; z-index:30;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    pointer-events:none;
+  }
+  .pagefoot .indicator{
+    pointer-events:auto;
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted);
+    background:rgba(0,0,0,.35); padding:5px 12px; border-radius:20px;
+    backdrop-filter:blur(4px);
+  }
+
+  .nav-btn{
+    position:absolute; top:50%; transform:translateY(-50%);
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(20,19,31,.65);
+    border:1px solid var(--hairline);
+    color:var(--cream);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; z-index:60; font-size:16px;
+    user-select:none;
+  }
+  .nav-btn.prev{ left:-52px; }
+  .nav-btn.next{ right:-52px; }
+  @media (max-width:560px){
+    .nav-btn{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="nav-btn prev" id="prevBtn">‹</div>
+  <div class="phone">
+    <div class="screen" id="screen">
+      <div class="notch"></div>
+      <div class="statusbar">
+        <span class="rec"><span class="dot"></span>REC</span>
+        <span id="tcLabel">00:00:00</span>
+      </div>
+
+      <div class="pages" id="pagesWrap">
+
+        <!-- PAGE 0 — COVER -->
+        <div class="pg current" data-tc="00:00:00">
+          <div class="cover-content">
+            <div class="bulb-glow"></div>
+            <div class="kicker">A short story</div>
+            <h1>TWO<br>FRIENDS</h1>
+            <div class="sub">இரண்டு நண்பர்கள்</div>
+            <p class="tag">He went looking for content. He came back with a reason to believe in his own dream again.</p>
+            <div class="byline">STORY BY<span class="name">Vimalgunasegaran</span></div>
+          </div>
+          <div class="tap-hint">tap right to begin ›</div>
+        </div>
+
+        <!-- PAGE 1 — CONTENTS -->
+        <div class="pg stacked" data-tc="00:00:02">
+          <div class="toc-eyebrow">— TIMELINE —</div>
+          <div class="track"></div>
+          <ul class="toc-list">
+            <li><span class="tc">00:00</span><span class="tt">The Content Hunt</span></li>
+            <li><span class="tc">00:04</span><span class="tt">World of Manoj Anandh</span></li>
+            <li><span class="tc">00:11</span><span class="tt">The Words He Heard</span></li>
+            <li><span class="tc">00:15</span><span class="tt">The Content</span></li>
+          </ul>
+        </div>
+
+        <!-- PAGE 2 — CH1 PART A -->
+        <div class="pg stacked" data-tc="00:00:12">
+          <div class="chapter-frame">
+            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+            <span class="rec-chip"><span class="dot"></span>00:00:00</span>
+            <h2 class="chapter-title">தேடல்<span class="en">CH.1 — THE CONTENT HUNT</span></h2>
+          </div>
+          <p>அன்று என்ன content செய்வது என்று கார்த்திக்குக்கே தெரியவில்லை.</p>
+          <p>Phone camera-வை on செய்துகொண்டு, selfie camera-வில் தன்னையே பார்த்தபடி tea kadai-க்கு நடந்துவந்தான்.</p>
+          <p class="cap">"Hello guys… innikku enna content panrathunu enakkum theriyala. Content illama tea kadaikku vandhirukken. Inga edhavadhu interesting-a nadakkudha nu paapom."</p>
+          <p>அவன் vlog-ஐ record செய்து முடித்துவிட்டு phone-ஐ கீழே வைத்தான்.</p>
+          <p>ஒரு tea-யை order செய்துவிட்டு, சுற்றிலும் casually பார்த்துக்கொண்டிருந்தான்.</p>
+          <p>அப்போதுதான் அவன் கவனம் கொஞ்சம் தூரத்தில் இருந்த ஒரு table மீது சென்றது.</p>
+        </div>
+
+        <!-- PAGE 3 — CH1 PART B -->
+        <div class="pg stacked" data-tc="00:02:40">
+          <div class="chapter-frame">
+            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+            <span class="rec-chip"><span class="dot"></span>00:02:40</span>
+            <h2 class="chapter-title">தேடல்<span class="en">CH.1 — CONTINUED</span></h2>
+          </div>
+          <p>அங்கே இரண்டு நண்பர்கள் tea குடித்துக்கொண்டு பேசிக்கொண்டிருந்தார்கள். கார்த்திக் அவர்களை கவனிக்க ஆரம்பித்தான். அவர்களின் conversation-ல் ஏதோ ஒரு naturalness இருந்தது.</p>
+          <p>அது சாதாரணமாக இரண்டு நண்பர்கள் பேசிக்கொள்ளும் conversation போல இருந்தாலும், கார்த்திக்கின் கவனத்தை விட்டு அது நகரவில்லை.</p>
+          <p>அவன் மனதில் ஒரு idea தோன்றியது. Phone-ஐ எடுத்தான். Mic-ஐ connect செய்தான். அதை ஒரு bottle-க்கு அருகில் வைத்து, அந்த இரண்டு நண்பர்களின் table பக்கத்தில் discreet-ஆ place செய்துவிட்டு, எதுவுமே நடக்காதது போல திரும்பி வந்தான்.</p>
+          <p>Mic-ன் recording light மட்டும் அமைதியாக blink செய்துகொண்டிருந்தது.</p>
+          <p>கார்த்திக் tea-ஐ எடுத்துக்கொண்டு கொஞ்சம் தூரத்தில் உட்கார்ந்தான். அவன் உடல் அங்கே இருந்தாலும், அவன் கவனம் முழுவதும் அந்த இரண்டு நண்பர்களிடமே இருந்தது.</p>
+          <p>அடுத்த சில நிமிடங்களில் அவன் கேட்கப்போகும் அந்த conversation… அவனுடைய வாழ்க்கையையே மாற்றப்போகிறது என்று அவனுக்குத் தெரியவில்லை.</p>
+        </div>
+
+        <!-- PAGE 4 — CH2 A -->
+        <div class="pg stacked" data-tc="00:04:12">
+          <div class="chapter-frame">
+            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+            <span class="rec-chip"><span class="dot"></span>00:04:12</span>
+            <h2 class="chapter-title">மனோஜ்<span class="en">CH.2 — WORLD OF MANOJ ANANDH</span></h2>
+          </div>
+          <p class="cap">"Dei macha, DC movie paathiya da?"</p>
+          <p class="cap">"Endha DC da? Detective Comics-aa?"</p>
+          <p class="cap">"Adei illa da… Lokesh Kanagaraj padam da!"</p>
+          <p class="cap">"Aah, adhuvaa? Naan innum paakala da. Nee paathuttiya? Enna vittuttu poi paathuttiya?"</p>
+          <p class="cap">"Naan unna koopitten da. Nee dhaan 'work mukkiyam' nu sollittu vara maatten-nu sonna. Naan movie paathuttu vandhuten."</p>
+          <p class="cap">"Sari, paathutta vidu. Tea kudida… aari pogudhu."</p>
+          <p class="cap">"Idhu comeback illa da… morattu comeback! Acting-la prove pannittaan da. Naan kooda sila scenes-la merandhuten."</p>
+        </div>
+
+        <!-- PAGE 5 — CH2 B -->
+        <div class="pg stacked" data-tc="00:06:05">
+          <div class="chapter-frame">
+            <span class="rec-chip"><span class="dot"></span>00:06:05</span>
+          </div>
+          <p>Vimal சிரித்துக்கொண்டே அவனைப் பார்த்தான். சில நொடிகள் அவனைப் பார்த்துக்கொண்டிருந்தவன், திடீரென்று கேட்டான்.</p>
+          <p class="cap">"Dei, nee eppo da indha maadhiri silver screen-la varuva?"</p>
+          <p>அந்த கேள்வி வந்ததும் Manoj அமைதியாகிவிட்டான். அவன் கையில் இருந்த tea glass-ஐ பார்த்துக்கொண்டிருந்தான். சில நொடிகள் எதுவும் பேசவில்லை.</p>
+          <p>பிறகு Vimal மெதுவாக சொன்னான்.</p>
+          <p class="cap">"'World of Manoj Anandh' nu oru padam varanum da."</p>
+          <p>Manoj சிரிக்க முயன்றான். ஆனால் அந்த சிரிப்பு முழுமையாக வரவில்லை.</p>
+          <p>Vimal தொடர்ந்தான்.</p>
+          <p class="cap">"Unakku story writing semmaiya varum da. Adha vida nee story explain panra vidham irukke… Padam edukkama kooda padatha paathadha maadhiri feel panna vechiduva."</p>
+          <p>Manoj-ன் முகத்தில் இருந்த smile மெதுவாக மறைந்தது. அவன் கீழே பார்த்துக்கொண்டே பேச ஆரம்பித்தான்.</p>
+          <p class="cap">"Ippolam kashtama irukku da. Financial crisis. Ennaala edhavadhu panna mudiyuma-nu kooda theriyala. Director aaganum-nu aasai irundhaalum, enga irundhu start panrathunu puriyala."</p>
+        </div>
+
+        <!-- PAGE 6 — CH2 C -->
+        <div class="pg stacked" data-tc="00:08:30">
+          <div class="chapter-frame">
+            <span class="rec-chip"><span class="dot"></span>00:08:30</span>
+          </div>
+          <p>Vimal அவனை serious-ஆ பார்த்தான்.</p>
+          <p class="cap">"Unakku interest konjam poirukkalam da… Aana enakku un mela irukkura nambikkai pogala."</p>
+          <p>Manoj அவனைப் பார்த்தான். Vimal-ன் குரலில் எந்த தயக்கமும் இல்லை.</p>
+          <p class="cap">"Un kadhaiya naan ketkaren. Nee feel pannadhu naan feel pannaren. Oru naal adha audiencekum solluven."</p>
+          <p class="cap">"Nee kandippa silver screen-ku varuva da."</p>
+          <p>அந்த வார்த்தைகளைக் கேட்டதும் Manoj-ன் கண்களில் உணர்ச்சி தெரிந்தது.</p>
+          <p class="cap">"Ennala mudiyuma da?" — "Unnala mudiyum da."</p>
+          <p>Vimal சிரிக்கவில்லை. அவன் serious-ஆவே சொன்னான்.</p>
+          <p class="cap">"Nee mudiyadhu-nu ninaikkura nerathula naan unna namburen."</p>
+          <p>அந்த வார்த்தைகளுக்குப் பிறகு இருவருக்கும் இடையில் சில நொடிகள் silence.</p>
+        </div>
+
+        <!-- PAGE 7 — CH2 D -->
+        <div class="pg stacked" data-tc="00:10:15">
+          <div class="chapter-frame">
+            <span class="rec-chip"><span class="dot"></span>00:10:15</span>
+          </div>
+          <p>பிறகு Vimal மீண்டும் பேசினான்.</p>
+          <p class="cap">"Unakku interest poiduchinalum, naan unna vittu vida maatten. Eppadiyaavadhu unna push panni, un kadhaiya ketkavechittu iruppen. Oru naal adha audience-kitta solluven."</p>
+          <p>Manoj emotional-ஆ சிரித்தான்.</p>
+          <p class="cap">"Appo naan varra varaikkum nee wait pannuva?"</p>
+          <p class="cap">"Wait panna maatten da… Unna push pannitte iruppen."</p>
+          <p>இருவரும் ஒருவரையொருவர் பார்த்துக்கொண்டனர். அடுத்த நொடி— இருவரும் tight-ஆ hug செய்துகொண்டனர்.</p>
+          <p>சில கனவுகள் நம்முடையதாக இருந்தாலும், அதை உயிரோடு வைத்திருப்பது சில நேரங்களில் இன்னொருவரின் நம்பிக்கையாக இருக்கலாம்.</p>
+          <p class="cap">"Sari va… polaam." — "Va da, future director."</p>
+          <p>Tea glasses இன்னும் table-ல் இருந்தபடியே இருந்தன. அவர்களின் conversation முடிந்துவிட்டது. ஆனால் அவர்கள் சொன்ன சில வார்த்தைகள்… அருகில் இருந்த ஒரு microphone-ல் இன்னும் பதிவு செய்யப்பட்டுக்கொண்டிருந்தன.</p>
+        </div>
+
+        <!-- PAGE 8 — CH3 A -->
+        <div class="pg stacked" data-tc="00:11:47">
+          <div class="chapter-frame">
+            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+            <span class="rec-chip"><span class="dot"></span>00:11:47</span>
+            <h2 class="chapter-title">கேட்ட வார்த்தைகள்<span class="en">CH.3 — THE WORDS HE HEARD</span></h2>
+          </div>
+          <p>அவர்கள் சென்ற direction-ஐ கார்த்திக் சில நொடிகள் அமைதியாகப் பார்த்துக்கொண்டிருந்தான். சில நொடிகளுக்கு முன்பு வரை content தேடிக்கொண்டிருந்த அவன்… இப்போது ஏதோ ஒன்றை உணர்ந்திருந்தான்.</p>
+          <p>அவன் மெதுவாக அந்த table-க்கு நடந்துசென்றான். Bottle அருகில் வைத்திருந்த microphone-ஐ எடுத்தான். Recording இன்னும் ஓடிக்கொண்டிருந்தது. அவன் recording-ஐ stop செய்தான்.</p>
+          <p>Mic-ஐ கையில் பிடித்தபடி சில நொடிகள் அங்கேயே நின்றான். அவனுக்குள் ஒரு guilt இருந்தது.</p>
+          <p>இரண்டு நண்பர்களின் தனிப்பட்ட conversation-ஐ தன்னுடைய content-க்காக record செய்திருந்தான்.</p>
+          <p>அவன் phone-ஐ எடுத்தான். அந்த audio-வை delete செய்யலாமா என்று ஒரு நொடி யோசித்தான். ஆனால் அதற்கு முன்பே… Play button-ஐ அழுத்திவிட்டான்.</p>
+        </div>
+
+        <!-- PAGE 9 — CH3 B -->
+        <div class="pg stacked" data-tc="00:13:20">
+          <div class="chapter-frame">
+            <span class="rec-chip"><span class="dot"></span>00:13:20</span>
+          </div>
+          <p>Tea kadai-யின் சத்தங்களுக்கு நடுவில், சில நிமிடங்களுக்கு முன்பு கேட்ட அந்த குரல்கள் மீண்டும் அவன் காதுகளில் விழ ஆரம்பித்தன.</p>
+          <p class="cap">"Unakku interest poirukkalam da… Aana enakku un mela irukkura nambikkai pogala."</p>
+          <p>கார்த்திக் அமைதியாகக் கேட்டுக்கொண்டிருந்தான். அந்த ஒரு வரி அவனை எதையோ நினைக்க வைத்தது.</p>
+          <p class="cap">"Unakku mudiyadhu-nu ninaikkura nerathula naan unna namburen."</p>
+          <p>கார்த்திக்கின் முகத்தில் இருந்த expression மெதுவாக மாறியது. அந்த வார்த்தைகள் Manoj-க்காக சொல்லப்பட்டிருந்தாலும்… அவை அவனுக்காகவே சொல்லப்பட்ட மாதிரி இருந்தது.</p>
+          <p>அவன் phone screen-ஐ பார்த்துக்கொண்டிருந்தான். Sadness. Hope. Regret. அனைத்தும் கலந்த ஒரு உணர்வு அவன் முகத்தில் தெரிந்தது.</p>
+        </div>
+
+        <!-- PAGE 10 — CH3 C -->
+        <div class="pg stacked" data-tc="00:14:35">
+          <div class="chapter-frame">
+            <span class="rec-chip"><span class="dot"></span>00:14:35</span>
+          </div>
+          <p>அவன் mic-ஐ மெதுவாக கீழே இறக்கினான். அவனுடைய நினைவுகளில் சில பழைய காட்சிகள் தோன்ற ஆரம்பித்தன.</p>
+          <p>ஒரு காலத்தில் அவனுக்கும் ஒரு கனவு இருந்தது. அதைப் பற்றி யாரிடமாவது சொல்லியிருந்தான். அதைப் பற்றி ஒருநாள் கண்டிப்பாக செய்வேன் என்று நினைத்திருந்தான்.</p>
+          <p>ஆனால் காலம் செல்லச் செல்ல… அந்த கனவு அவனுடைய வாழ்க்கையில் இருந்து கொஞ்சம் கொஞ்சமாக மறைந்துவிட்டது. அவன் அதை மறந்துவிட்டதாக நினைத்திருந்தான். ஆனால் இப்போது… அந்த கனவு இன்னும் அவனுக்குள் எங்கோ இருந்தது.</p>
+          <p>அவன் தன்னைத்தானே பார்த்துக்கொண்டான்.</p>
+          <p class="cap">"நான் ஏன் ஆரம்பிக்கக்கூடாது?"</p>
+          <p>அந்த கேள்வி அவன் மனதில் முதல் முறையாக தெளிவாக எழுந்தது. அவன் மெதுவாக ஒரு முடிவு எடுத்தான்.</p>
+          <p>அவன் phone camera-வை மீண்டும் on செய்தான். இந்த முறை… அவன் content-ஐ தேடவில்லை. அவன் தன்னையே தேட ஆரம்பித்திருந்தான்.</p>
+        </div>
+
+        <!-- PAGE 11 — CH4 A -->
+        <div class="pg stacked" data-tc="00:15:30">
+          <div class="chapter-frame">
+            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+            <span class="rec-chip"><span class="dot"></span>00:15:30</span>
+            <h2 class="chapter-title">உள்ளடக்கம்<span class="en">CH.4 — THE CONTENT</span></h2>
+          </div>
+          <p>கார்த்திக் மீண்டும் phone camera-வை on செய்தான். ஆனால் இந்த முறை… அவன் முகத்தில் இருந்த expression வேறாக இருந்தது.</p>
+          <p>Content creator-ஆக camera-வை பார்த்த அந்த முகம் இல்லை. தன்னுடைய வாழ்க்கையைப் பற்றி பேசப்போகும் ஒருவனின் முகம்.</p>
+          <p class="cap">"Hello guys… Innikku oru different content."</p>
+          <p class="cap">"Sometimes namma life-la content illa-nu ninaippom. Aana namma life-la nadakkura oru simple conversation kooda, namma motha life-a maatha mudiyum."</p>
+          <p class="cap">"Innikku content theda tea kadaikku ponen. Aana anga enna pathi naan marandhutta oru vishayatha thirumba kandupidichen."</p>
+        </div>
+
+        <!-- PAGE 12 — CH4 B -->
+        <div class="pg stacked" data-tc="00:16:40">
+          <div class="chapter-frame">
+            <span class="rec-chip"><span class="dot"></span>00:16:40</span>
+          </div>
+          <p>அவன் கண்களில் emotion தெரிந்தது.</p>
+          <p class="cap">"En kanavu mela enakke nambikkai illa. Aana en nanbanukku en mela innum nambikkai irukku."</p>
+          <p class="cap">"Avan sonna vaarthaigal nala… Naan thirumba ezhutha start panna poren."</p>
+          <p class="cap">"Maybe… naan en kanava marandhirukkalam. Aana oru nanban namma mela nambikkaiya vidaama irundha… Adhu podhum."</p>
+          <p class="cap">"Maybe… idhu enoda new beginning."</p>
+          <p>Camera-வை stop செய்தான். Phone screen இருட்டானது. பிறகு phone-ஐ pocket-ல் வைத்துக்கொண்டு அங்கிருந்து நடக்க ஆரம்பித்தான்.</p>
+          <p>இந்த முறை… அவன் content இல்லாமல் tea kadaikku வந்தவன் இல்லை. ஒரு புதிய beginning-ஐ எடுத்துக்கொண்டு அங்கிருந்து சென்றான்.</p>
+        </div>
+
+        <!-- PAGE 13 — STOP SCREEN -->
+        <div class="pg stacked stop" data-tc="00:17:02">
+          <div style="text-align:center; margin-top:20px;">
+            <span class="rec-chip"><span class="dot" style="background:var(--muted); box-shadow:none;"></span>RECORDING STOPPED</span>
+          </div>
+          <p>
+            அன்று கார்த்திக் ஒரு content-ஐ தேடி tea kadaikku சென்றான். ஆனால் அவன் கண்டுபிடித்தது ஒரு content இல்லை —<br><br>
+            ஒரு நம்பிக்கை. ஒரு கனவு. ஒரு நண்பன்.<br><br>
+            சில நேரங்களில் நம்முடைய கனவு இறந்துவிட்டது என்று நாமே நினைத்துக்கொண்டிருப்போம். ஆனால் எங்கோ ஒருவன் அந்த கனவு இன்னும் உயிரோடு இருக்கிறது என்று நம்பிக்கொண்டிருப்பான். அந்த ஒரே நம்பிக்கை போதும்.
+          </p>
+        </div>
+
+        <!-- PAGE 14 — CREDITS -->
+        <div class="pg stacked" data-tc="00:17:30">
+          <div class="credits">
+            <p class="card">"Oru nanban namma pakkathula irundha podhum…<br>sila kanavugal thirumba uyir perum."</p>
+            <div class="the-end">The End</div>
+            <div class="by">STORY BY<span class="name">Vimalgunasegaran</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pagefoot">
+        <div class="indicator"><span id="pageNum">1</span> / <span id="pageTotal">15</span></div>
+      </div>
+      <div class="home-indicator"></div>
+      <div class="tapzone left" id="tapLeft"></div>
+      <div class="tapzone right" id="tapRight"></div>
+    </div>
+  </div>
+  <div class="nav-btn next" id="nextBtn">›</div>
+
+<script>
+  const pages = Array.from(document.querySelectorAll('.pg'));
+  let idx = 0;
+  const tcLabel = document.getElementById('tcLabel');
+  const pageNum = document.getElementById('pageNum');
+  document.getElementById('pageTotal').textContent = pages.length;
+
+  function render(prevIdx, dir){
+    pages.forEach((p, i) => {
+      p.classList.remove('current','left-hidden','right-hidden','stacked','shading');
+      if(i === idx){
+        p.classList.add('current');
+        if(dir) p.classList.add('shading');
+      } else if(i < idx){
+        p.classList.add('left-hidden');
+      } else {
+        p.classList.add('right-hidden');
+      }
+    });
+    tcLabel.textContent = pages[idx].dataset.tc || '00:00:00';
+    pageNum.textContent = idx + 1;
+  }
+
+  function next(){
+    if(idx >= pages.length - 1) return;
+    idx++;
+    render(idx-1, 'fwd');
+  }
+  function prev(){
+    if(idx <= 0) return;
+    idx--;
+    render(idx+1, 'back');
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', next);
+  document.getElementById('prevBtn').addEventListener('click', prev);
+  document.getElementById('tapRight').addEventListener('click', next);
+  document.getElementById('tapLeft').addEventListener('click', prev);
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowRight') next();
+    if(e.key === 'ArrowLeft') prev();
+  });
+
+  // basic swipe support
+  let touchStartX = null;
+  const screenEl = document.getElementById('screen');
+  screenEl.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, {passive:true});
+  screenEl.addEventListener('touchend', (e) => {
+    if(touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if(dx < -40) next();
+    if(dx > 40) prev();
+    touchStartX = null;
+  }, {passive:true});
+
+  // init
+  render(0, null);
+</script>
+</body>
+</html>
